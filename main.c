@@ -1,3 +1,4 @@
+#include "test.h"
 #include "main.h"
 #include "watek_glowny.h"
 #include "watek_komunikacyjny.h"
@@ -6,6 +7,8 @@ int rank, size;
 state_t stan=InRun;
 pthread_t threadKom, threadMon;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
+
+#ifndef _TEST
 
 void finalizuj()
 {
@@ -61,3 +64,4 @@ int main(int argc, char **argv)
     return 0;
 }
 
+#endif
