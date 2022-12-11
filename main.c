@@ -12,7 +12,7 @@ pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
 
 void finalizuj()
 {
-    pthread_mutex_destroy( &stateMut);
+    pthread_mutex_destroy(&stateMut);
     /* Czekamy, aż wątek potomny się zakończy */
     println("czekam na wątek \"komunikacyjny\"\n" );
     pthread_join(threadKom,NULL);
@@ -44,23 +44,48 @@ void check_thread_support(int provided)
     }
 }
 
+thread_context_t *create_thread_context()
+{
+    thread_context_t *context = malloc(sizeof(thread_context_t));
+
+    context->clock = malloc(sizeof(logic_clock_t));
+    context->queue = malloc(sizeof(queue_t));
+
+    logic_clock_init(context->clock);
+    init_queue(context->queue);
+
+    return context;
+}
+
+void destroy_thread_context(thread_context_t *context)
+{
+    free(context->clock);
+    free(context->queue);
+    free(context);
+}
 
 int main(int argc, char **argv)
 {
     MPI_Status status;
     int provided;
+    packet_t pkt;
+
+    thread_context_t *context = create_thread_context();
+    
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     check_thread_support(provided);
     srand(rank);
     inicjuj_typ_pakietu(); // tworzy typ pakietu
-    packet_t pkt;
+
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    pthread_create( &threadKom, NULL, startKomWatek , 0);
+    pthread_create(&threadKom, NULL, startKomWatek , context);
 
-    mainLoop();
+    mainLoop(context);
     
     finalizuj();
+    destroy_thread_context(context);
+
     return 0;
 }
 

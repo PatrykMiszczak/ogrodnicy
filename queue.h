@@ -5,9 +5,10 @@
 #include <stdbool.h>
 
 typedef struct {
-    // TODO: sort by ts and instance_id
+    // TODO: sort by instance_id
 
-    int ts; // timestamp - zegar lamporta
+    int instance_id;
+    int ts; // Lamport timestamp
 
     pthread_mutex_t _mutex;
 } message_t;

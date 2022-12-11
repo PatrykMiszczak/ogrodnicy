@@ -3,22 +3,22 @@
 
 #include <pthread.h>
 
-struct logic_clock {
+typedef struct {
 	int ts;	// Timestamp
 
 	pthread_mutex_t _mutex;
-};
+} logic_clock_t;
 
-void logic_clock_init(struct logic_clock *clock);
+void logic_clock_create(logic_clock_t *clock);
 
 /**
  * @brief Set the current time of the logic clock if it is greater than the current time.
  */
-void logic_clock_update(struct logic_clock *clock, int new_time);
+void logic_clock_update(logic_clock_t *clock, int timestamp);
 
 /**
  * @brief Get the current time of the logic clock and increment it.
  */
-int logic_clock_get(struct logic_clock *clock);
+int logic_clock_get(logic_clock_t *clock);
 
 #endif // LOGIC_CLOCK_H

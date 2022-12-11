@@ -1,17 +1,22 @@
 #include "main.h"
 #include "util.h"
+
 MPI_Datatype MPI_PAKIET_T;
 
 struct tagNames_t{
     const char *name;
     int tag;
-} tagNames[] = { { "pakiet aplikacyjny", APP_PKT }, { "finish", FINISH}};
+} tagNames[] = {{ "pakiet aplikacyjny", AppPkt }, { "finish", Finish }};
 
-const char const *tag2string( int tag )
+const char *tag2string(packet_tag tag)
 {
-    for (int i=0; i <sizeof(tagNames)/sizeof(struct tagNames_t);i++) {
-    if ( tagNames[i].tag == tag )  return tagNames[i].name;
+    int tagsLen = sizeof(tagNames) / sizeof(struct tagNames_t);
+
+    for (int i=0; i < tagsLen; i++) {
+        if ( tagNames[i].tag == tag )
+            return tagNames[i].name;
     }
+
     return "<unknown>";
 }
 /* tworzy typ MPI_PAKIET_T
@@ -37,23 +42,39 @@ void inicjuj_typ_pakietu()
 }
 
 /* opis patrz util.h */
-void sendPacket(packet_t *pkt, int destination, int tag)
+void sendPacket(logic_clock_t *clock, packet_t *pkt, int destination, packet_tag tag)
 {
-    int freepkt=0;
-    if (pkt==0) { pkt = malloc(sizeof(packet_t)); freepkt=1;}
+    int freepkt = 0;
+
+    if (pkt == 0) {
+        pkt = malloc(sizeof(packet_t));
+
+        freepkt = 1;
+    }
+
     pkt->src = rank;
-    MPI_Send( pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
-    debug("Wysyłam %s do %d\n", tag2string( tag), destination);
-    if (freepkt) free(pkt);
+    pkt->ts = logic_clock_get(clock);
+
+    MPI_Send(pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
+
+    debug("Wysyłam %s do %d (tc = %d)\n", tag2string(tag), destination, pkt->ts);
+
+    if (freepkt) {
+        free(pkt);
+    }
 }
 
 void changeState( state_t newState )
 {
     pthread_mutex_lock( &stateMut );
+
     if (stan==InFinish) { 
-	pthread_mutex_unlock( &stateMut );
+        pthread_mutex_unlock( &stateMut );
+
         return;
     }
+
     stan = newState;
+
     pthread_mutex_unlock( &stateMut );
 }
