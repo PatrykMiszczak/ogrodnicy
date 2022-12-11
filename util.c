@@ -10,7 +10,7 @@ struct tagNames_t{
 const char const *tag2string( int tag )
 {
     for (int i=0; i <sizeof(tagNames)/sizeof(struct tagNames_t);i++) {
-	if ( tagNames[i].tag == tag )  return tagNames[i].name;
+    if ( tagNames[i].tag == tag )  return tagNames[i].name;
     }
     return "<unknown>";
 }

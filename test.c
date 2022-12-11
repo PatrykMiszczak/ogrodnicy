@@ -8,6 +8,8 @@
 
 message_t *create_message(int ts);
 
+#define assert(x) if (!(x)) { printf("Assertion failed: %s (%s:%d) \n", #x, __FILE__, __LINE__); }
+
 void dump(queue_t* queue) {
     printf("## dump\n");
 
@@ -16,12 +18,13 @@ void dump(queue_t* queue) {
     }
 }
 
-void _queueAddTest() {
+void _queueAdd_test() {
     printf("# Queue add TEST\n");
 
     queue_t queue;
 
     init_queue(&queue);
+    lock_queue(&queue);
 
     push_message(&queue, create_message(1));
     push_message(&queue, create_message(2));
@@ -36,14 +39,29 @@ void _queueAddTest() {
 
     // Expected output: 1 .. 10
     dump(&queue);
+
+    assert(queue.len == 10);
+    assert(get_message(&queue, 0)->ts == 1);
+    assert(get_message(&queue, 1)->ts == 2);
+    assert(get_message(&queue, 2)->ts == 3);
+    assert(get_message(&queue, 3)->ts == 4);
+    assert(get_message(&queue, 4)->ts == 5);
+    assert(get_message(&queue, 5)->ts == 6);
+    assert(get_message(&queue, 6)->ts == 7);
+    assert(get_message(&queue, 7)->ts == 8);
+    assert(get_message(&queue, 8)->ts == 9);
+    assert(get_message(&queue, 9)->ts == 10);
+
+    unlock_queue(&queue);
 }
 
-void _queueRemoveTest() {
+void _queueRemove_test() {
     printf("# Queue remove TEST\n");
 
     queue_t queue;
 
     init_queue(&queue);
+    lock_queue(&queue);
 
     push_message(&queue, create_message(1));
     push_message(&queue, create_message(2));
@@ -57,14 +75,21 @@ void _queueRemoveTest() {
 
     // Expected output: 2, 4
     dump(&queue);
+
+    assert(queue.len == 2);
+    assert(get_message(&queue, 0)->ts == 2);
+    assert(get_message(&queue, 1)->ts == 4);
+
+    unlock_queue(&queue);
 }
 
-void _queueRemoveAddTest() {
+void _queueRemoveAdd_test() {
     printf("# Queue remove & add TEST\n");
 
     queue_t queue;
 
     init_queue(&queue);
+    lock_queue(&queue);
 
     push_message(&queue, create_message(1));
     push_message(&queue, create_message(2));
@@ -82,12 +107,21 @@ void _queueRemoveAddTest() {
 
     // Expected output: 0, 2, 3, 4, 10
     dump(&queue);
+
+    assert(queue.len == 5);
+    assert(get_message(&queue, 0)->ts == 0);
+    assert(get_message(&queue, 1)->ts == 2);
+    assert(get_message(&queue, 2)->ts == 3);
+    assert(get_message(&queue, 3)->ts == 4);
+    assert(get_message(&queue, 4)->ts == 10);
+
+    unlock_queue(&queue);
 }
 
 int main() {
-    _queueAddTest();
-    _queueRemoveTest();
-    _queueRemoveAddTest();
+    _queueAdd_test();
+    _queueRemove_test();
+    _queueRemoveAdd_test();
 }
 
 message_t *create_message(int ts) {
