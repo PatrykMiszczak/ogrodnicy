@@ -1,29 +1,18 @@
 #ifndef UTILH
 #define UTILH
 
-#include "main.h"
 #include "logic_clock.h"
-
-/* typ pakietu */
-typedef struct {
-    int ts;       // Lemport's clock
-    int src;  
-
-    int data;
-} packet_t;
-
-/* packet_t ma trzy pola, więc NITEMS=3. Wykorzystane w inicjuj_typ_pakietu */
-#define NITEMS 3
+#include "global_context.h"
+#include "message.h"
 
 typedef enum {
     AppPkt = 1,
     Finish = 2
-} packet_tag;
+} message_tag;
 
-extern MPI_Datatype MPI_PAKIET_T;
-void inicjuj_typ_pakietu();
+void broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag);
 
 /* wysyłanie pakietu, skrót: wskaźnik do pakietu (0 oznacza stwórz pusty pakiet), do kogo, z jakim typem */
-void sendPacket(logic_clock_t * clock, packet_t *pkt, int destination, packet_tag tag);
+void sendMessage(logic_clock_t * clock, message_t *pkt, int destination, message_tag tag);
 
 #endif
