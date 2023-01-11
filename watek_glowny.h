@@ -1,9 +1,9 @@
 #ifndef WATEK_GLOWNY_H
 #define WATEK_GLOWNY_H
 
-#include "thread_context.h"
+#include "global_context.h"
 
 /* pętla główna aplikacji: zmiany stanów itd */
-void mainLoop(thread_context_t *context);
+void mainLoop(global_context_t *context);
 
 #endif

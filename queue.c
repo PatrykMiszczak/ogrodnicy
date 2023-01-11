@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "queue.h"
+#include "util.h"
 
 void init_queue(queue_t *queue) {
     queue->len = 0;

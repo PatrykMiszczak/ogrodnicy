@@ -9,7 +9,7 @@ typedef struct {
 	pthread_mutex_t _mutex;
 } logic_clock_t;
 
-void logic_clock_create(logic_clock_t *clock);
+void logic_clock_init(logic_clock_t *clock);
 
 /**
  * @brief Set the current time of the logic clock if it is greater than the current time.
