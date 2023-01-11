@@ -42,7 +42,7 @@ void inicjuj_typ_pakietu()
 }
 
 /* opis patrz util.h */
-void sendPacket(logic_clock_t *clock, packet_t *pkt, int destination, packet_tag tag)
+void sendPacket(logic_clock_t *clock, packet_t *pkt, packet_tag tag)
 {
     int freepkt = 0;
 
@@ -54,11 +54,13 @@ void sendPacket(logic_clock_t *clock, packet_t *pkt, int destination, packet_tag
 
     pkt->src = rank;
     pkt->ts = logic_clock_get(clock);
-
-    MPI_Send(pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
-
-    debug("Wysyłam %s do %d (tc = %d)\n", tag2string(tag), destination, pkt->ts);
-
+    
+    for (int destination = 1; destination < size; destination++)
+    {
+        MPI_Send(pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
+        debug("Wysyłam %s do %d (tc = %d)\n", tag2string(tag), destination, pkt->ts);
+    }
+    
     if (freepkt) {
         free(pkt);
     }

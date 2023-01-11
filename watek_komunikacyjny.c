@@ -1,6 +1,7 @@
 #include "main.h"
 #include "watek_komunikacyjny.h"
 
+
 /* wątek komunikacyjny; zajmuje się odbiorem i reakcją na komunikaty */
 void *startKomWatek(thread_context_t *context)
 {
@@ -24,10 +25,29 @@ void *startKomWatek(thread_context_t *context)
                     changeState(InFinish);
             break;
 
-            case AppPkt: 
-                    debug("Dostałem pakiet od %d z danymi %d (ts = %d)", pakiet.src, pakiet.data, pakiet.ts);
+            case AppPkt:
+            switch (pakiet.data){ //checking the packet message type
+            
+                case ReadyForNewTaskMessage:
+                    debug("Dostałem pakiet od %d z danymi %d (ts = %d). Dodaje czekającego do kolejki", pakiet.src, pakiet.data, pakiet.ts);
+                    lock_queue(queue);
+                    push_message(queue, create_message(pakiet.ts, pakiet.src));
+                    sort_queue(queue, queue->len);
+                    unlock_queue(queue);
+                break;
+                
+                case NewTaskMessage:
+                    lock_queue(queue);
+                    if(rank == get_message(queue, 0)->instance_id)
+                        changeState(InReadingLiterature);
 
-                    // TODO: push to queue
+                    remove_message(queue, 0);
+                    unlock_queue(queue);
+                break;
+
+                default:
+                    break;
+            }
             break;
 
             default:

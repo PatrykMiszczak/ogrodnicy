@@ -1,6 +1,6 @@
 #ifndef MAINH
 #define MAINH
-#include <mpi.h>
+#include </usr/lib/x86_64-linux-gnu/openmpi/include/mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -19,7 +19,7 @@
 
 extern int rank;
 extern int size;
-typedef enum {InRun, InMonitor, InSend, InFinish} state_t;
+typedef enum {InRun, InMonitor, InSend, InFinish, InReadingLiterature, InCollectingStuff, InWorkingOnTask} state_t;
 extern state_t stan;
 extern pthread_t threadKom, threadMon;
 
