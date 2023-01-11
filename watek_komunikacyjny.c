@@ -26,13 +26,31 @@ void *startKomWatek(global_context_t *context)
             break;
 
             case AppPkt: 
-                    debug("Dostałem pakiet od %d z danymi %d (ts = %d)", pakiet.src, pakiet.data, pakiet.ts);
+                    switch (pakiet.data){ //checking the packet message type
 
-                    message_t *msg = malloc(sizeof(message_t));
+                        case ReadyForNewTaskMessage:
+                            debug("Dostałem pakiet od %d z danymi %d (ts = %d). Dodaje czekającego do kolejki", pakiet.src, pakiet.data, pakiet.ts);
+                            lock_queue(queue);
 
-                    *msg = pakiet;
+                            message_t *msg = malloc(sizeof(message_t));
+                            *msg = pakiet;
 
-                    push_message(context->queue, msg);
+                            push_message(queue, msg);
+                            unlock_queue(queue);
+                        break;
+
+                        case NewTaskMessage:
+                            lock_queue(queue);
+                            if(rank == get_message(queue, 0)->src)
+                                changeState(InReadingLiterature);
+
+                            remove_message(queue, 0);
+                            unlock_queue(queue);
+                        break;
+
+                        default:
+                            break;
+                    }
             break;
 
             default:
