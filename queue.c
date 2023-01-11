@@ -37,7 +37,13 @@ void push_message(queue_t *queue, message_t *message) {
     int i;
 
     for (i = queue->len - 2; i >= 0; i--) {
+        // Sort by timestamp
         if (queue->_q[i]->ts < message->ts) {
+            break;
+        }
+
+        // Sort by instance id
+        if (queue->_q[i]->ts == message->ts && queue->_q[i]->instance_id < message->instance_id) {
             break;
         }
     }
