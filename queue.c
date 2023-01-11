@@ -75,6 +75,46 @@ message_t *get_message(queue_t *queue, int index) {
     return queue->_q[index];
 }
 
+message_t *create_message(int ts, int instance_id) {
+    message_t *message = malloc(sizeof(message_t));
+
+    message->ts = ts;
+    message->instance_id = instance_id;
+
+    return message;
+}
+
+int compare_messages(const void *m1, const void *m2){
+    const message_t *tmp1 = (message_t *)m1;
+    const message_t *tmp2 = (message_t *)m2;
+    if (tmp1->ts < tmp2->ts)
+        return -1;
+    else if (tmp1->ts > tmp2->ts)
+        return +1;
+    else
+        if (tmp1->instance_id < tmp2->instance_id)
+            return -1;
+        else if (tmp1->instance_id > tmp2->instance_id)
+            return +1;
+        else
+            return 0;
+}
+
+void sort_queue(queue_t *queue, int len){
+    assert(queue->locked);
+    qsort(queue, len, sizeof(message_t), compare_messages);
+}
+
+bool check_presence_in_queue(int rank, queue_t *queue){
+    assert(queue->locked);
+    assert(rank >= 0);
+    for(int i = 0; i < queue->len; i++){
+        if (get_message(queue, i)->instance_id == rank) 
+            return true;
+    }
+    return false;
+}
+
 void lock_queue(queue_t *queue) {
     pthread_mutex_lock(&(queue->_mutex));
     queue->locked = true;
@@ -84,3 +124,4 @@ void unlock_queue(queue_t *queue) {
     queue->locked = false;
     pthread_mutex_unlock(&(queue->_mutex));
 }
+
