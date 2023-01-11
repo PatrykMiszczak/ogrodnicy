@@ -1,14 +1,15 @@
 #include "main.h"
 #include "watek_glowny.h"
+#include "util.h"
 
-void mainLoop(thread_context_t *context)
+void mainLoop(global_context_t *context)
 {
 	logic_clock_t *clock = context->clock;
 	queue_t *queue = context->queue;
 
 	srandom(rank);
 
-	packet_tag tag;
+	message_tag tag;
 
 	while (stan != InFinish) {
 		int perc = random() % 100; 
@@ -19,14 +20,14 @@ void mainLoop(thread_context_t *context)
 
 				changeState(InSend);
 
-				packet_t *pkt = malloc(sizeof(packet_t));
+				message_t *pkt = malloc(sizeof(message_t));
 				pkt->data = perc;
 				perc = random() % 100;
 				tag = ( perc < 25 ) ? Finish : AppPkt;
 
 				debug("Perc: %d", perc);
 				
-				sendPacket(clock, pkt, (rank + 1) % size, tag);
+				sendMessage(clock, pkt, (rank + 1) % size, tag);
 
 				changeState(InRun);
 

@@ -5,8 +5,10 @@
 #include "queue.h"
 
 typedef struct {
+	int rank;
+	int size;
 	logic_clock_t *clock;
 	queue_t *queue;
-} thread_context_t;
+} global_context_t;
 
 #endif // THREAD_CONTEXT_H

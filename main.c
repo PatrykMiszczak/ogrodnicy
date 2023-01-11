@@ -2,6 +2,8 @@
 #include "main.h"
 #include "watek_glowny.h"
 #include "watek_komunikacyjny.h"
+#include "global_context.h"
+#include "message.h"
 
 int rank, size;
 state_t stan=InRun;
@@ -16,7 +18,7 @@ void finalizuj()
     /* Czekamy, aż wątek potomny się zakończy */
     println("czekam na wątek \"komunikacyjny\"\n" );
     pthread_join(threadKom,NULL);
-    MPI_Type_free(&MPI_PAKIET_T);
+    MPI_Type_free(&MPI_MESSAGE_T);
     MPI_Finalize();
 }
 
@@ -44,12 +46,14 @@ void check_thread_support(int provided)
     }
 }
 
-thread_context_t *create_thread_context()
+global_context_t *create_global_context()
 {
-    thread_context_t *context = malloc(sizeof(thread_context_t));
+    global_context_t *context = malloc(sizeof(global_context_t));
 
     context->clock = malloc(sizeof(logic_clock_t));
     context->queue = malloc(sizeof(queue_t));
+    context->rank = rank;
+    context->size = size;
 
     logic_clock_init(context->clock);
     init_queue(context->queue);
@@ -57,7 +61,7 @@ thread_context_t *create_thread_context()
     return context;
 }
 
-void destroy_thread_context(thread_context_t *context)
+void destroy_global_context(global_context_t *context)
 {
     free(context->clock);
     free(context->queue);
@@ -68,9 +72,9 @@ int main(int argc, char **argv)
 {
     MPI_Status status;
     int provided;
-    packet_t pkt;
+    message_t pkt;
 
-    thread_context_t *context = create_thread_context();
+    global_context_t *context = create_global_context();
     
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     check_thread_support(provided);
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
     mainLoop(context);
     
     finalizuj();
-    destroy_thread_context(context);
+    destroy_global_context(context);
 
     return 0;
 }

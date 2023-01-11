@@ -3,15 +3,7 @@
 
 #include <pthread.h>
 #include <stdbool.h>
-
-typedef struct {
-    // TODO: sort by instance_id
-
-    int instance_id;
-    int ts; // Lamport timestamp
-
-    pthread_mutex_t _mutex;
-} message_t;
+#include "message.h"
 
 typedef struct {
     int len;
