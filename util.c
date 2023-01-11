@@ -22,11 +22,9 @@ const char *tag2string(message_tag tag)
 
 void broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag)
 {
-    // wysyłamy do wszystkich oprócz siebie oraz instytutu (o rankingu 0)
+    // wysyłamy do wszystkich oraz instytutu (o rankingu 0)
     for (int i = 1; i < context->size; i++) {
-        if (i != context->rank) {
-            sendMessage(context->clock, pkt, i, tag);
-        }
+        sendMessage(context->clock, pkt, i, tag);
     }
 }
 
