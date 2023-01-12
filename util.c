@@ -22,14 +22,15 @@ const char *tag2string(message_tag tag)
 
 void broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag)
 {
+    pkt->ts = logic_clock_get(context->clock);
     // wysyłamy do wszystkich oraz instytutu (o rankingu 0)
-    for (int i = 1; i < context->size; i++) {
+    for (int i = 1; i < size; i++) {
         sendMessage(context->clock, pkt, i, tag);
     }
 }
 
 /* opis patrz util.h */
-void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_tag tag)
+void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_tag tag) //TODO: jeśli zegar nie jest ustawiony, ustaw w send message
 {
     int freepkt = 0;
 
@@ -40,11 +41,10 @@ void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_
     }
 
     pkt->src = rank;
-    pkt->ts = logic_clock_get(clock);
 
     MPI_Send(pkt, 1, MPI_MESSAGE_T, destination, tag, MPI_COMM_WORLD);
 
-    debug("Wysyłam %s do %d (tc = %d)\n", tag2string(tag), destination, pkt->ts);
+    debug("Wysyłam %s do %d (tc = %d) o tresci: %d\n", tag2string(tag), destination, pkt->ts, pkt->data);
 
     if (freepkt) {
         free(pkt);

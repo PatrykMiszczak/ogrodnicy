@@ -22,7 +22,7 @@ void mainLoop(global_context_t *context)
 			changeState(InSend);
 
 			message_t *message = malloc(sizeof(message_t));
-			message->data = NewTaskMessage;
+			message->type = NewTaskMessage;
 			tag = AppPkt;
 
 			broadcastMessage(context, message, tag);
@@ -52,7 +52,7 @@ void mainLoop(global_context_t *context)
 				sleep(1);
 				changeState(InSend);
 				message_t *message = malloc(sizeof(message_t));
-				message->data = ReadyForNewTaskMessage;
+				message->type = ReadyForNewTaskMessage;
 
 				tag = AppPkt;
 
@@ -73,11 +73,11 @@ void mainLoop(global_context_t *context)
 
 					changeState(InSend);
 					message_t *message = malloc(sizeof(message_t));
-					message->data = ReadyForNewTaskMessage;
-
+					message->type = ReadyForNewTaskMessage;
 					tag = AppPkt;
 
 					broadcastMessage(context, message, tag);
+					free(message);
 
 					changeState(InRun);
 

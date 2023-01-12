@@ -17,6 +17,8 @@ void *startKomWatek(global_context_t *context)
         debug("czekam na recv");
 
         MPI_Recv(&pakiet, 1, MPI_MESSAGE_T, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        debug("Dostałem pakiet od %d z danymi %d, message typpe: %d (ts = %d)", pakiet.src, pakiet.data, pakiet.type, pakiet.ts);
+
 
         logic_clock_update(clock, pakiet.ts);
 
@@ -25,11 +27,12 @@ void *startKomWatek(global_context_t *context)
                     changeState(InFinish);
             break;
 
-            case AppPkt: 
-                    switch (pakiet.data){ //checking the packet message type
+            case AppPkt:
+
+                    switch (pakiet.type){ //checking the packet message type
 
                         case ReadyForNewTaskMessage:
-                            debug("Dostałem pakiet od %d z danymi %d (ts = %d). Dodaje czekającego do kolejki", pakiet.src, pakiet.data, pakiet.ts);
+                            debug("Dodaje %d czekającego do kolejki", pakiet.src);
                             lock_queue(queue);
 
                             message_t *msg = malloc(sizeof(message_t));
@@ -49,11 +52,13 @@ void *startKomWatek(global_context_t *context)
                         break;
 
                         default:
+                            debug("Something went wrong: pakiet.type");
                             break;
                     }
             break;
 
             default:
+                debug("Something went wrong: status.MPI_TAG")
             break;
         }
     }

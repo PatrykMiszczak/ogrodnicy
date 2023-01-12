@@ -52,8 +52,8 @@ global_context_t *create_global_context()
 
     context->clock = malloc(sizeof(logic_clock_t));
     context->queue = malloc(sizeof(queue_t));
-    context->rank = rank;
-    context->size = size;
+    // context->rank = rank; //creating rank here makes it assigned to 1, not to proprer value - commented to not confuse
+    // context->size = size; //same for this
 
     logic_clock_init(context->clock);
     init_queue(context->queue);
@@ -75,6 +75,7 @@ int main(int argc, char **argv)
     message_t pkt;
 
     global_context_t *context = create_global_context();
+    debug("%d", rank);
     
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     check_thread_support(provided);
@@ -83,6 +84,7 @@ int main(int argc, char **argv)
 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    debug("%d", rank);
     pthread_create(&threadKom, NULL, startKomWatek , context);
 
     mainLoop(context);
