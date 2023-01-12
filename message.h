@@ -4,8 +4,10 @@
 #include "main.h"
 
 typedef enum {
-    ReadyForNewTaskMessage = 1,
-    NewTaskMessage = 2
+    GARDENER_REQ_TASK = 1,
+    GARDENER_ACK_TASK = 2,
+    GARDENER_RELEASE_TASK = 3,
+    NEW_TASK = 4
 } message_type;
 
 typedef struct {

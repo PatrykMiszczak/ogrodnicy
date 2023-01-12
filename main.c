@@ -51,20 +51,29 @@ global_context_t *create_global_context()
     global_context_t *context = malloc(sizeof(global_context_t));
 
     context->clock = malloc(sizeof(logic_clock_t));
-    context->queue = malloc(sizeof(queue_t));
-    // context->rank = rank; //creating rank here makes it assigned to 1, not to proprer value - commented to not confuse
-    // context->size = size; //same for this
+    context->queue_gardeners = malloc(sizeof(queue_t));
+    context->queue_tasks = malloc(sizeof(queue_t));
+    context->rank = rank; 
+    context->size = size;
+
 
     logic_clock_init(context->clock);
-    init_queue(context->queue);
-
+    init_queue(context->queue_gardeners);
+    init_queue(context->queue_tasks);
+    context->gardeners_clocks = malloc(sizeof(int) * size);
+    for (int i = 0; i < size; i++) {
+        context->gardeners_clocks[i] = 0;
+    }
+    pthread_mutex_init(&context->gardeners_clocks_mutex, NULL);
     return context;
 }
 
 void destroy_global_context(global_context_t *context)
 {
     free(context->clock);
-    free(context->queue);
+    free(context->queue_gardeners);
+    free(context->queue_tasks);
+    free(context->gardeners_clocks);
     free(context);
 }
 
@@ -74,9 +83,6 @@ int main(int argc, char **argv)
     int provided;
     message_t pkt;
 
-    global_context_t *context = create_global_context();
-    debug("%d", rank);
-    
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     check_thread_support(provided);
     srand(rank);
@@ -84,7 +90,7 @@ int main(int argc, char **argv)
 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    debug("%d", rank);
+    global_context_t *context = create_global_context();
     pthread_create(&threadKom, NULL, startKomWatek , context);
 
     mainLoop(context);
