@@ -97,7 +97,6 @@ bool check_presence_in_queue(int rank, queue_t *queue){
     assert(rank >= 0);
 
     for(int i = 0; i < queue->len; i++){
-        debug("Get message queue.c L100")
         if (get_message(queue, i)->src == rank) 
             return true;
     }

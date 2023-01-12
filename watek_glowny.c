@@ -94,13 +94,27 @@ void mainLoop(global_context_t *context)
 
 				sleep(sleep_time);
 				changeState(InCollectingStuff);
+				pthread_mutex_lock(&(context->agreement_num_mutex));
+				context->agreement_num = 0;
+				pthread_mutex_unlock(&(context->agreement_num_mutex));
+				message_t *message = malloc(sizeof(message_t));
+				message->type = GARDENER_REQ_TOOL;
+				tag = AppPkt;
+
+				broadcastMessage(context, message, tag);
 
 			} else if (stan == InCollectingStuff) {
 				// collectingstuff
-				int sleep_time = (rand() % 3) + 1;
-				sleep(sleep_time);
 
-				changeState(InWorkingOnTask);
+				int tool_amount = 2; // TODO: make global or in context
+
+				debug("proc: %d agreement_num: %d", context->rank, context->agreement_num);
+
+				if (context->agreement_num < context->size - tool_amount)
+				{
+					changeState(InWorkingOnTask);
+				}
+				
 			} else if (stan == InWorkingOnTask) {
 				int sleep_time = (rand() % 3) + 1;
 				sleep(sleep_time);

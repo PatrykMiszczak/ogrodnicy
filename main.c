@@ -53,18 +53,22 @@ global_context_t *create_global_context()
     context->clock = malloc(sizeof(logic_clock_t));
     context->queue_gardeners = malloc(sizeof(queue_t));
     context->queue_tasks = malloc(sizeof(queue_t));
+    context->queue_tools = malloc(sizeof(queue_t));
     context->rank = rank; 
     context->size = size;
-
+    context->agreement_num = 0;
 
     logic_clock_init(context->clock);
     init_queue(context->queue_gardeners);
     init_queue(context->queue_tasks);
+    init_queue(context->queue_tools);
     context->gardeners_clocks = malloc(sizeof(int) * size);
     for (int i = 0; i < size; i++) {
         context->gardeners_clocks[i] = 0;
     }
     pthread_mutex_init(&context->gardeners_clocks_mutex, NULL);
+    pthread_mutex_init(&context->agreement_num_mutex, NULL);
+    
     return context;
 }
 
@@ -73,6 +77,7 @@ void destroy_global_context(global_context_t *context)
     free(context->clock);
     free(context->queue_gardeners);
     free(context->queue_tasks);
+    free(context->queue_tools);
     free(context->gardeners_clocks);
     free(context);
 }
