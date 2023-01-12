@@ -72,6 +72,11 @@ bool canProcessTask(global_context_t *context) {
     message_t *message;
 
     lock_queue(queue_gardeners);
+    if (context->queue_gardeners->len == 0){
+        unlock_queue(queue_gardeners);
+        return false;
+    }
+    debug("util.c L75")
     message = get_message(queue_gardeners, 0);
     unlock_queue(queue_gardeners);
 

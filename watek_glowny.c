@@ -57,11 +57,12 @@ void mainLoop(global_context_t *context)
 					// debug("Skończyłem wysyłać");
 				}
 
-				// 
+				// TODO: `context->queue_tasks->len != 0` should be in lock
 
 				if(context->queue_tasks->len != 0 && canProcessTask(context)){
 					changeState(InReadingLiterature);
 					lock_queue(context->queue_tasks);
+					debug("get message watekglowny L65")
 					debug("Gardener: %d podejmuje zadanie %d", context->rank, get_message(context->queue_tasks, 0)->ts);
 					unlock_queue(context->queue_tasks);
 					message_t *message_rel = malloc(sizeof(message_t));
@@ -96,24 +97,14 @@ void mainLoop(global_context_t *context)
 
 			} else if (stan == InCollectingStuff) {
 				// collectingstuff
-
 				int sleep_time = (rand() % 3) + 1;
 				sleep(sleep_time);
 
 				changeState(InWorkingOnTask);
 			} else if (stan == InWorkingOnTask) {
-				sleep(1);
-				changeState(InSend);
-				
-				message_t *message_req = malloc(sizeof(message_t));
-				message_req->type = GARDENER_REQ_TASK;
-				tag = AppPkt;
-				broadcastMessage(context, message_req, tag);
-				free(message_req);
-				
+				int sleep_time = (rand() % 3) + 1;
+				sleep(sleep_time);
 				changeState(InRun);
-
-				// debug("Skończyłem wysyłać");
 
 			}
 		}
