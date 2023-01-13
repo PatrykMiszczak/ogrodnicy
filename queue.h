@@ -25,4 +25,6 @@ void unlock_queue(queue_t *queue);
 
 message_t *get_message(queue_t *queue, int index);
 
+bool check_presence_in_queue(int rank, queue_t *queue);
+
 #endif

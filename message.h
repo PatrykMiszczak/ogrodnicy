@@ -3,10 +3,20 @@
 
 #include "main.h"
 
+typedef enum {
+    GARDENER_REQ_TASK = 1,
+    GARDENER_ACK_TASK = 2,
+    GARDENER_RELEASE_TASK = 3,
+    NEW_TASK = 4,
+    GARDENER_REQ_TOOL = 5,
+    GARDENER_ACK_TOOL = 6
+} message_type;
+
 typedef struct {
     int ts;       // Lemport's clock
     int src;  
 
+    int type; // message_type - enum is not supported by MPI
     int data;
 } message_t;
 

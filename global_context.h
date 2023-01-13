@@ -8,7 +8,13 @@ typedef struct {
 	int rank;
 	int size;
 	logic_clock_t *clock;
-	queue_t *queue;
+	queue_t *queue_gardeners;
+	queue_t *queue_tasks;
+	queue_t *queue_tools;
+	int *agreement_num;
+	pthread_mutex_t agreement_num_mutex;
+	int *gardeners_clocks;
+	pthread_mutex_t gardeners_clocks_mutex;
 } global_context_t;
 
 #endif // THREAD_CONTEXT_H

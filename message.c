@@ -1,8 +1,7 @@
 #include "main.h"
 #include "message.h"
 
-/* message_t ma trzy pola, więc NITEMS=3. Wykorzystane w inicjuj_typ_pakietu */
-#define NITEMS 3
+#define NITEMS 4
 
 MPI_Datatype MPI_MESSAGE_T;
 
@@ -15,13 +14,14 @@ void inicjuj_typ_pakietu()
        brzydzimy się czymś w rodzaju MPI_Send(&typ, sizeof(pakiet_t), MPI_BYTE....
     */
     /* sklejone z stackoverflow */
-    int       blocklengths[NITEMS] = {1,1,1};
-    MPI_Datatype typy[NITEMS] = {MPI_INT, MPI_INT, MPI_INT};
+    int       blocklengths[NITEMS] = {1,1,1,1};
+    MPI_Datatype typy[NITEMS] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT};
 
     MPI_Aint     offsets[NITEMS]; 
     offsets[0] = offsetof(message_t, ts);
     offsets[1] = offsetof(message_t, src);
-    offsets[2] = offsetof(message_t, data);
+    offsets[2] = offsetof(message_t, type);
+    offsets[3] = offsetof(message_t, data);
 
     MPI_Type_create_struct(NITEMS, blocklengths, offsets, typy, &MPI_MESSAGE_T);
 

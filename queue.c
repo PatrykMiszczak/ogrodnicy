@@ -38,7 +38,13 @@ void push_message(queue_t *queue, message_t *message) {
     int i;
 
     for (i = queue->len - 2; i >= 0; i--) {
+        // Sort by timestamp
         if (queue->_q[i]->ts < message->ts) {
+            break;
+        }
+
+        // Sort by instance id
+        if (queue->_q[i]->ts == message->ts && queue->_q[i]->src < message->src) {
             break;
         }
     }
@@ -84,4 +90,16 @@ void lock_queue(queue_t *queue) {
 void unlock_queue(queue_t *queue) {
     queue->locked = false;
     pthread_mutex_unlock(&(queue->_mutex));
+}
+
+bool check_presence_in_queue(int rank, queue_t *queue){
+    assert(queue->locked);
+    assert(rank >= 0);
+
+    for(int i = 0; i < queue->len; i++){
+        if (get_message(queue, i)->src == rank) 
+            return true;
+    }
+
+    return false;
 }
