@@ -22,17 +22,31 @@ const char *tag2string(message_tag tag)
     return "<unknown>";
 }
 
-void broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag)
+int broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag)
 {
-    pkt->ts = logic_clock_get(context->clock);
+    int ts = logic_clock_get(context->clock);
+
+    pkt->ts = ts;
     // wysyłamy do wszystkich oraz instytutu (o rankingu 0)
     for (int i = 1; i < size; i++) {
-        sendMessage(context->clock, pkt, i, tag);
+        _sendMessage(pkt, i, tag);
     }
+
+    free(pkt);
+
+    return ts;
+}
+
+int sendMessage(message_t *pkt, int destination, message_tag tag) {
+    int ts = _sendMessage(pkt, destination, tag, true);
+
+    free(pkt);
+
+    return ts;
 }
 
 /* opis patrz util.h */
-void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_tag tag)
+int _sendMessage(message_t *pkt, int destination, message_tag tag)
 {
     assert(pkt != NULL);
 
@@ -46,7 +60,7 @@ void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_
 
     // debug("Wysyłam %s do %d (tc = %d) o tresci: %d\n", tag2string(tag), destination, pkt->ts, pkt->data);
 
-    free(pkt);
+    return pkt->ts;
 }
 
 void changeState( state_t newState )
@@ -102,4 +116,14 @@ bool canProcessTask(global_context_t *context) {
     pthread_mutex_unlock(&(context->gardeners_clocks_mutex));
 
     return true;
+}
+
+bool hasHigherPriority(int ts_1, int rank_1, int ts_2, int rank_2) {
+    if (ts_1 < ts_2)
+        return true;
+    
+    if (ts_1 == ts_2 && rank_1 < rank_2)
+        return true;
+
+    return false;
 }

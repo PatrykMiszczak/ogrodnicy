@@ -18,7 +18,6 @@ void logic_clock_update(logic_clock_t *clock, int timestamp) {
 int logic_clock_get(logic_clock_t *clock) {
 	pthread_mutex_lock(&(clock->_mutex));
 
-	// TODO: Should be before or after?
 	clock->ts++;
 
 	int ret = clock->ts;

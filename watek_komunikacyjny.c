@@ -50,7 +50,6 @@ void *startKomWatek(global_context_t *context)
                             message_req->type = GARDENER_ACK_TASK;
                             message_tag tag = AppPkt;
                             broadcastMessage(context, message_req, tag);
-                            free(message_req);
 
                             unlock_queue(queue_gardeners);
                         break;
@@ -78,8 +77,11 @@ void *startKomWatek(global_context_t *context)
                             if (pakiet.src == rank)
                                 break;
 
-                            // TODO: if waiting for tool from gardener and the priority is lower, add to queue
-                            if (stan == InWorkingOnTask) {
+                            if (
+                                stan == InWorkingOnTask
+                                ||
+                                (stan == InCollectingStuff && hasHigherPriority(context->tool_request_ts, context->rank, pakiet.ts, pakiet.src))
+                            ) {
                                 context->gardeners_waiting_for_tool[pakiet.src] = true;
 
                                 break;
@@ -87,10 +89,10 @@ void *startKomWatek(global_context_t *context)
 
                             message_t *message = malloc(sizeof(message_t));
                             message->type = GARDENER_ACK_TOOL;
-                            message->ts = 0;
+                            message->ts = logic_clock_get(context->clock);
                             tag = AppPkt;
 
-                            sendMessage(context, message, pakiet.src, tag);
+                            sendMessage(message, pakiet.src, tag);
                         break;
 
                         case NEW_TASK:
@@ -104,7 +106,7 @@ void *startKomWatek(global_context_t *context)
                         break;
 
                         default:
-                            debug("Something went wrong: pakiet.type");
+                            debug("Something went wrong: pakiet.type: %d", pakiet.type);
                             break;
                     }
             break;

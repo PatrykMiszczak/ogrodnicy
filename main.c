@@ -5,7 +5,9 @@
 #include "global_context.h"
 #include "message.h"
 
+
 int rank, size;
+
 state_t stan=InRun;
 pthread_t threadKom, threadMon;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
@@ -58,6 +60,7 @@ global_context_t *create_global_context()
     context->size = size;
     context->agreement_num = 0;
     context->gardeners_clocks = malloc(sizeof(int) * size);
+    context->tool_request_ts = 0;
 
     logic_clock_init(context->clock);
     init_queue(context->queue_gardeners);

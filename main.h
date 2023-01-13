@@ -13,6 +13,7 @@
 #define FALSE 0
 #define SEC_IN_STATE 1
 #define STATE_CHANGE_PROB 10
+#define TOOL_NUM 2
 
 #define ROOT 0
 
@@ -44,7 +45,8 @@ extern pthread_mutex_t stateMut;
                                             
 */
 #ifdef DEBUG
-#define debug(FORMAT,...) printf("%c[%d;%dm [%d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, ##__VA_ARGS__, 27,0,37);
+// #define debug(FORMAT,...) printf("%c[%d;%dm [%d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, ##__VA_ARGS__, 27,0,37);
+#define debug(FORMAT,...) printf("[%d]: " FORMAT "\n",  rank, ##__VA_ARGS__); 
 #else
 #define debug(...) ;
 #endif

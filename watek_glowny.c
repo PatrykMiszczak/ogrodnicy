@@ -12,6 +12,7 @@ void mainLoop(global_context_t *context)
 	sleep(rand() % 3);
 	message_type message_type;
 	message_tag tag;
+	int task_id = 0;
 
 	while (stan != InFinish) {
 		// Instytut
@@ -57,32 +58,32 @@ void mainLoop(global_context_t *context)
 					// debug("Skończyłem wysyłać");
 				}
 
-				// TODO: `context->queue_tasks->len != 0` should be in lock
+				lock_queue(context->queue_tasks);
 
 				if(context->queue_tasks->len != 0 && canProcessTask(context)){
+					task_id = get_message(context->queue_tasks, 0)->ts;
+
 					changeState(InReadingLiterature);
-					lock_queue(context->queue_tasks);
-					debug("get message watekglowny L65")
-					debug("Gardener: %d podejmuje zadanie %d", context->rank, get_message(context->queue_tasks, 0)->ts);
-					unlock_queue(context->queue_tasks);
 					message_t *message_rel = malloc(sizeof(message_t));
 					message_rel->type = GARDENER_RELEASE_TASK;
 					tag = AppPkt;
 					broadcastMessage(context, message_rel, tag);
-					free(message_rel);
 				}
+
+				unlock_queue(context->queue_tasks);
 
 				// dump_queue("queue_gardeners", queue_gardeners);
 				// dump_queue("queue_tasks", queue_tasks);
 
 			} else if (stan == InReadingLiterature){
 				// implement sleeping random time and changing state to collecting stuff
+				debug("Gardener: %d zaczyna czytac do zadania %d", context->rank, task_id);
+
 				int sleep_time = (rand() % 3) + 1;
 
 				// debug("Podejmuję nowe zadanie i idę czytać na %d sekund", sleep_time)
 
 				sleep(sleep_time);
-				changeState(InCollectingStuff);
 				pthread_mutex_lock(&(context->agreement_num_mutex));
 				context->agreement_num = 0;
 				pthread_mutex_unlock(&(context->agreement_num_mutex));
@@ -90,38 +91,44 @@ void mainLoop(global_context_t *context)
 				message->type = GARDENER_REQ_TOOL;
 				tag = AppPkt;
 
-				broadcastMessage(context, message, tag);
+				context->tool_request_ts = broadcastMessage(context, message, tag);
+				debug("Gardener: %d oczekuje na narzedzia do zadania %d", context->rank, task_id);
+				changeState(InCollectingStuff);
 
 			} else if (stan == InCollectingStuff) {
 				// collectingstuff
 
-				int tool_amount = 2; // TODO: make global or in context
+				// debug("proc: %d agreement_num: %d, czy moge brac zadanie?: %d", context->rank, context->agreement_num, context->agreement_num >= context->size - 1 - TOOL_NUM);
 
-				debug("proc: %d agreement_num: %d", context->rank, context->agreement_num);
-
-				if (context->agreement_num < context->size - tool_amount)
+				// (-1) - to skip the institute
+				if (context->agreement_num >= context->size - 1 - TOOL_NUM)
 				{
 					changeState(InWorkingOnTask);
 				}
 				
 			} else if (stan == InWorkingOnTask) {
-				int sleep_time = (rand() % 3) + 1;
+				debug("Gardener: %d zaczyna zadanie %d", context->rank, task_id);
+				int sleep_time = (rand() % 3) + 10;
 				sleep(sleep_time);
 				changeState(InRun);
 
-				// TODO: shouldn't be in lock?
+				int ts = logic_clock_get(context->clock);
+
 				for (int gardener_number = 1; gardener_number < context->size; gardener_number++) {
 					if (context->gardeners_waiting_for_tool[gardener_number] == false)
 						continue;
 
 					message_t *message = malloc(sizeof(message_t));
 					message->type = GARDENER_ACK_TOOL;
+					message->ts = ts;
 					tag = AppPkt;
 
-					sendMessage(context, message, gardener_number, tag);
+					sendMessage(message, gardener_number, tag);
 
 					context->gardeners_waiting_for_tool[gardener_number] = false;
 				}
+
+				debug("Gardener: %d konczy czytac do zadania %d", context->rank, task_id);
 			}
 		}
 
