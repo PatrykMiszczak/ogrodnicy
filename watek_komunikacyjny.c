@@ -70,20 +70,27 @@ void *startKomWatek(global_context_t *context)
 
                         case GARDENER_ACK_TOOL:
                             pthread_mutex_lock(&(context->agreement_num_mutex));
-                            // TODO: Check who should receive the ACK (one receiver vs all gardeners)
                             context->agreement_num++;
                             pthread_mutex_unlock(&(context->agreement_num_mutex));
                         break;
 
                         case GARDENER_REQ_TOOL:
-                            if (stan != InWorkingOnTask && message->src != rank) {
-                                // TODO: Check priority and add to queue
+                            if (pakiet.src == rank)
+                                break;
 
-                                message_t *message = malloc(sizeof(message_t));
-                                message->type = GARDENER_ACK_TOOL;
-                                tag = AppPkt;
-                                broadcastMessage(context, message, tag);
+                            // TODO: if waiting for tool from gardener and the priority is lower, add to queue
+                            if (stan == InWorkingOnTask) {
+                                context->gardeners_waiting_for_tool[pakiet.src] = true;
+
+                                break;
                             }
+
+                            message_t *message = malloc(sizeof(message_t));
+                            message->type = GARDENER_ACK_TOOL;
+                            message->ts = 0;
+                            tag = AppPkt;
+
+                            sendMessage(context, message, pakiet.src, tag);
                         break;
 
                         case NEW_TASK:

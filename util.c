@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "main.h"
 #include "util.h"
 #include "global_context.h"
@@ -30,14 +32,12 @@ void broadcastMessage(global_context_t *context, message_t *pkt, message_tag tag
 }
 
 /* opis patrz util.h */
-void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_tag tag) //TODO: jeśli zegar nie jest ustawiony, ustaw w send message
+void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_tag tag)
 {
-    int freepkt = 0;
+    assert(pkt != NULL);
 
-    if (pkt == 0) {
-        pkt = malloc(sizeof(message_t));
-
-        freepkt = 1;
+    if (pkt->ts == 0) {
+        pkt->ts = logic_clock_get(clock);
     }
 
     pkt->src = rank;
@@ -46,9 +46,7 @@ void sendMessage(logic_clock_t *clock, message_t *pkt, int destination, message_
 
     // debug("Wysyłam %s do %d (tc = %d) o tresci: %d\n", tag2string(tag), destination, pkt->ts, pkt->data);
 
-    if (freepkt) {
-        free(pkt);
-    }
+    free(pkt);
 }
 
 void changeState( state_t newState )

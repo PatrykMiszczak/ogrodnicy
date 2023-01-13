@@ -72,19 +72,8 @@ void mainLoop(global_context_t *context)
 					free(message_rel);
 				}
 
-				// debug("## dump queue_gardeners\n");
-				// lock_queue(queue_gardeners);
-				// for (int i = 0; i < queue_gardeners->len; i++) {
-				// 	debug("%d %d\n", get_message(queue_gardeners, i)->ts, get_message(queue_gardeners, i)->src);
-				// }
-				// unlock_queue(queue_gardeners);
-
-				// debug("## dump queue_tasks\n");
-				// lock_queue(queue_tasks);
-				// for (int i = 0; i < queue_tasks->len; i++) {
-				// 	debug("%d %d\n", get_message(queue_tasks, i)->ts, get_message(queue_tasks, i)->src);
-				// }
-				// unlock_queue(queue_tasks);
+				// dump_queue("queue_gardeners", queue_gardeners);
+				// dump_queue("queue_tasks", queue_tasks);
 
 			} else if (stan == InReadingLiterature){
 				// implement sleeping random time and changing state to collecting stuff
@@ -120,6 +109,19 @@ void mainLoop(global_context_t *context)
 				sleep(sleep_time);
 				changeState(InRun);
 
+				// TODO: shouldn't be in lock?
+				for (int gardener_number = 1; gardener_number < context->size; gardener_number++) {
+					if (context->gardeners_waiting_for_tool[gardener_number] == false)
+						continue;
+
+					message_t *message = malloc(sizeof(message_t));
+					message->type = GARDENER_ACK_TOOL;
+					tag = AppPkt;
+
+					sendMessage(context, message, gardener_number, tag);
+
+					context->gardeners_waiting_for_tool[gardener_number] = false;
+				}
 			}
 		}
 

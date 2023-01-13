@@ -10,7 +10,7 @@ typedef struct {
 	logic_clock_t *clock;
 	queue_t *queue_gardeners;
 	queue_t *queue_tasks;
-	queue_t *queue_tools;
+	bool *gardeners_waiting_for_tool;
 	int *agreement_num;
 	pthread_mutex_t agreement_num_mutex;
 	int *gardeners_clocks;

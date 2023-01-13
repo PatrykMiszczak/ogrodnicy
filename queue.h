@@ -27,4 +27,6 @@ message_t *get_message(queue_t *queue, int index);
 
 bool check_presence_in_queue(int rank, queue_t *queue);
 
+void dump_queue(const char *name, queue_t *queue);
+
 #endif

@@ -103,3 +103,21 @@ bool check_presence_in_queue(int rank, queue_t *queue){
 
     return false;
 }
+
+void dump_queue(const char *name, queue_t *queue) {
+    lock_queue(queue);
+
+    debug("## dump queue %s", name);
+
+    if (queue->len == 0) {
+        debug(" (queue is empty)");
+    }
+
+    for (int i = 0; i < queue->len; i++) {
+        message_t *message = get_message(queue, i);
+
+        debug("  %d: src=%d ts=%d type=%d data=%d", i, message->src, message->ts, message->type, message->data);
+    }
+
+    unlock_queue(queue);
+}
